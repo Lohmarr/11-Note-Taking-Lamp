@@ -44,7 +44,7 @@ app.post('/api/notes', (req, res) => {
     notesData.push(newNote);
   
     // Write the updated notesData array back to the db.json file
-    fs.writeFile('./db/db.json', JSON.stringify(notesData), (err) => {
+    fs.writeFile('./db/db.json', JSON.stringify(notesData, null, 2), (err) => {
       if (err) {
         console.error(err);
         res.status(500).send('Error saving note');
@@ -52,6 +52,44 @@ app.post('/api/notes', (req, res) => {
         // Return the new note as the response to the client
         res.json(newNote);
       }
+    });
+  });
+
+  app.delete('/api/notes/:id', (req, res) => {
+    const id = req.params.id;
+    
+    // Read the notes data from the db.json file
+    fs.readFile('./db/db.json', 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error reading notes');
+        return;
+      }
+  
+      // Parse the JSON data into an array of notes
+      let notesData = JSON.parse(data);
+  
+      // Find the note with the given ID
+      const index = notesData.findIndex((note) => note.id === id);
+      if (index === -1) {
+        res.status(404).send('Note not found');
+        return;
+      }
+  
+      // Remove the note from the array
+      notesData.splice(index, 1);
+  
+      // Write the updated notesData array back to the db.json file
+      fs.writeFile('./db/db.json', JSON.stringify(notesData), (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send('Error saving notes');
+          return;
+        }
+  
+        // Send a success response to the terminal
+        console.info(`${req.method} request received to delete note ${id}`);
+      });
     });
   });
 
