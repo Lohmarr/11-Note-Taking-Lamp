@@ -90,6 +90,11 @@ const handleNoteDelete = (e) => {
   }
 
   deleteNote(noteId).then(() => {
+    // Remove the deleted note from the list
+    const deletedNote = document.querySelector(`[data-note='{"id":${noteId}}']`);
+    deletedNote.remove();
+
+    // Re-render list of notes
     getAndRenderNotes();
     renderActiveNote();
   });
